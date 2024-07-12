@@ -1,4 +1,4 @@
-This project is designed to automate the case management protocols for a local urgent care clinic. It involves handling patient records based on their triage priority levels and other attributes like case number and patient number for the day.
+This project is designed to automate the case management protocols for an urgent care clinic. It involves handling patient records based on their triage priority levels and other attributes like case number and patient number for the day.
 
 Features:
 Patient Triage Management: Assigns and manages patients based on triage priority levels (RED, YELLOW, GREEN).
