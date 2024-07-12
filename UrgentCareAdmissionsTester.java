@@ -1,257 +1,161 @@
 //////////////// FILE HEADER (INCLUDE IN EVERY FILE) //////////////////////////
 //
-// Title:    Urgent Care Admissions
+// Title:    ExceptionalCareTester.java
 // Course:   CS 300 Spring 2023
-//
 // Author:   Rishabh Jain
 // Email:    rvjain@wisc.edu
 // Lecturer: Hobbes LeGault
 //
 ///////////////////////// ALWAYS CREDIT OUTSIDE HELP //////////////////////////
 //
-// Persons:         NONE
-// Online Sources:  NONE
+// Persons:         None
+// Online Sources:  None
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-import java.util.Arrays; // consider using Arrays.deepEquals() to test the contents of a 2D array
+import java.io.File;
 
 /**
- * This class contains tester methods that are used to test the methods provided in the
- * UrgentCareAdmissions.java file. It has one tester method corresponding to each method in the main
- * file, and an extra tester method to test all the edge cases. This class tells which methods are
- * working correctly and which are working incorrectly by returning true or false accordingly.
- *
- * @author Hobbes
- * @author Rishabh Jain
+ * Tester methods to test the ExceptionalCareAdmissions.java methods.
  */
-public class UrgentCareAdmissionsTester {
+public class ExceptionalCareTester {
 
   /**
-   * This test method is provided for you in its entirety, to give you a model for the rest of this
-   * class. This method tests the getAdmissionIndex() method on a non-empty, non-full array of
-   * patient records which we create and maintain here.
+   * This test method is provided for you in its entirety, to give you a model for testing an
+   * instantiable class. This method verifies the correctness of your PatientRecord class.
    *
-   * This method tests three scenarios:
+   * In this test, we create two PatientRecords with different information and use the accessor
+   * methods to verify that both contain the correct information and have the correct String
+   * representation.
    *
-   * 1. Adding a patient with a HIGHER triage priority than any currently present in the array. To
-   * do this, we create an array with no RED priority patients and get the index to add a RED
-   * priority patient. We expect this to be 0, so if we get any other value, the test fails.
-   *
-   * 2. Adding a patient with a LOWER triage priority than any currently present in the array. To do
-   * this, we create an array with no GREEN priority patients and get the index to add a GREEN
-   * priority patient. We expect this to be the current size of the oversize array, so if we get any
-   * other value, the test fails.
-   *
-   * 3. Adding a patient with the SAME triage priority as existing patients. New patients at the
-   * same priority should be added AFTER any existing patients. We test this for all three triage
-   * levels on an array containing patients at all three levels.
-   *
-   * @return true if and only if all test scenarios pass, false otherwise
+   * @return true if and only if all scenarios pass, false otherwise
    * @author hobbes
    */
-  public static boolean testGetIndex() {
+  public static boolean testPatientRecord() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
 
-    // The non-empty, non-full oversize arrays to use in this test.
-    // Note that we're using the UrgentCareAdmissions named constants to create these test records,
-    // rather than their corresponding literal int values. 
-    // This way if the numbers were to change in UrgentCareAdmissions, our test will still be valid.
-    int[][] patientsListAllLevels =
-        new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.YELLOW},
-            {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-            {31501, 1, UrgentCareAdmissions.GREEN}, null, null, null};
-    int allLevelsSize = 5;
 
-    int[][] patientsListOnlyYellow = new int[][] {{21801, 2, UrgentCareAdmissions.YELLOW},
-        {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW}, null,
-        null, null, null, null};
-    int onlyYellowSize = 3;
+    // (1) create two PatientRecords with different, valid input
+    // no exceptions should be thrown, so let's be safe:
+    PatientRecord test1 = null, test2 = null;
+    try {
+      test1 = new PatientRecord('M', 17, PatientRecord.YELLOW);
+      test2 = new PatientRecord('X', 21, PatientRecord.GREEN);
+    } catch (Exception e) {
+      return false;
+    }
 
-    // scenario 1: add a patient with a higher priority than any existing patient
+
+    // (2) verify their data fields:
     {
-      int expected = 0;
-      int actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.RED, patientsListOnlyYellow,
-              onlyYellowSize);
-      if (expected != actual) {
+      // CASE_NUMBER
+      int expected1 = 21701;
+      int expected2 = 32102;
+      if (test1.CASE_NUMBER != expected1 || test2.CASE_NUMBER != expected2) {
+        return false;
+      }
+    }
+    {
+      // triage
+      int expected1 = PatientRecord.YELLOW;
+      int expected2 = PatientRecord.GREEN;
+      if (test1.getTriage() != expected1 || test2.getTriage() != expected2) {
+        return false;
+      }
+    }
+    {
+      // gender
+      char expected1 = 'M';
+      char expected2 = 'X';
+      if (test1.getGender() != expected1 || test2.getGender() != expected2) {
+        return false;
+      }
+    }
+    {
+      // age
+      int expected1 = 17;
+      int expected2 = 21;
+      if (test1.getAge() != expected1 || test2.getAge() != expected2) {
+        return false;
+      }
+    }
+    {
+      // orderOfArrival
+      int expected1 = 1;
+      int expected2 = 2;
+      if (test1.getArrivalOrder() != expected1 || test2.getArrivalOrder() != expected2) {
+        return false;
+      }
+    }
+    {
+      // hasBeenSeen - try the mutator too
+      if (test1.hasBeenSeen() || test2.hasBeenSeen()) {
+        return false;
+      }
+      test1.seePatient();
+      if (!test1.hasBeenSeen() || test2.hasBeenSeen()) {
         return false;
       }
     }
 
-    // scenario 2: add a patient with a lower priority than any existing patient
+
+    // (3) verify their string representations
     {
-      int expected = onlyYellowSize;
-      int actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.GREEN, patientsListOnlyYellow,
-              onlyYellowSize);
-      if (expected != actual) {
+      String expected1 = "21701: 17M (YELLOW)";
+      String expected2 = "32102: 21X (GREEN)";
+      if (!test1.toString().equals(expected1) || !test2.toString().equals(expected2)) {
         return false;
       }
     }
 
-    // scenario 3: verify that a patient with the same priority as existing patients gets
-    // added after all of those patients
-    {
-      int expected = 1;
-      int actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.RED, patientsListAllLevels,
-              allLevelsSize);
-      if (expected != actual) {
-        return false;
-      }
 
-      expected = 4;
-      actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.YELLOW, patientsListAllLevels,
-              allLevelsSize);
-      if (expected != actual) {
+    // (4) finally, verify that the constructor throws an exception for an invalid triage value
+    try {
+      new PatientRecord('F', 4, -17);
+      // if we get here, no exception was thrown and the test fails
+      return false;
+    } catch (IllegalArgumentException e) {
+      // correct exception type, but it should have a message:
+      if (e.getMessage() == null || e.getMessage().isBlank()) {
         return false;
       }
-
-      expected = allLevelsSize;
-      actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.GREEN, patientsListAllLevels,
-              allLevelsSize);
-      if (expected != actual) {
-        return false;
-      }
+    } catch (Exception e) {
+      // incorrect exception type
+      return false;
     }
 
-    // and finally, verify that the arrays were not changed at all
-    {
-      int[][] allLevelsCopy = new int[][] {{32702, 3, UrgentCareAdmissions.RED},
-          {21801, 2, UrgentCareAdmissions.YELLOW}, {22002, 4, UrgentCareAdmissions.YELLOW},
-          {11901, 5, UrgentCareAdmissions.YELLOW}, {31501, 1, UrgentCareAdmissions.GREEN}, null,
-          null, null};
-      if (!Arrays.deepEquals(patientsListAllLevels, allLevelsCopy)) {
-        return false;
-      }
-
-      int[][] onlyYellowCopy = new int[][] {{21801, 2, UrgentCareAdmissions.YELLOW},
-          {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW}, null,
-          null, null, null, null};
-      if (!Arrays.deepEquals(patientsListOnlyYellow, onlyYellowCopy)) {
-        return false;
-      }
-    }
-
+    // if we've gotten this far, we haven't failed either of the scenarios, so our test passes!
     return true;
   }
 
   /**
-   * This method tests the addPatient() method using the following 3 scenarios:
+   * This method tests that a valid input constructor call does not throw any exceptions and that a
+   * newly created object has size 0, is not full, has no seen patients, and its toString() is an
+   * empty string.
    *
-   * 1. Adding a patient record at the end of patient list. To do this, we create a patient record
-   * with the lowest triagle level (GREEN) and the highest arrival order of all the other patient
-   * records in the patient list. We create a patient list with random patient records and one empty
-   * position at the end where our new record should be added. We expect the size of the patients
-   * list to increase by 1, and if we get any other value for the size the test fails.
-   *
-   * 2. Adding a patient record in the middle of the patient list. To do this, we create a patient
-   * record with the YELLOW triagle level and the highest arrival order of all the other patient
-   * records in the patient list. We create a patient list such that there is atleast one patient
-   * with the GREEN triagle level, and one empty position on the list, so that there is space for
-   * new patient with the YELLOW triagle, and it gets added in the middle of the list. We expect the
-   * size of the patients list to increase by 1, and if we get any other value for the size the test
-   * fails.
-   *
-   * 3. Adding a patient record with an invalid index value. To do this we create a patient record
-   * with an invalid index and try adding it to the patients list with random values and atleast one
-   * empty position in a try/catch block. If no ArrayIndexOutOfBoundsException is thrown, then the
-   * test fails.
-   *
-   * @return true if and only if all test scenarios pass, false otherwise
-   * @author Rishabh Jain
+   * @return True, if and only if all scenario's pass, and false otherwise
    */
-  public static boolean testAddPatient() {
-    // (1) add a patient to the END of the patientsList
-    {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN}, null};
-      int size = 5;
-      int[] patientRecord = new int[] {32789, 6, 0};
-      int index = 5;
-      int expected = 6;
-      int actual = UrgentCareAdmissions.addPatient(patientRecord, index, patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
-    }
+  public static boolean testAdmissionsConstructorValid() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
 
-    // (2) add a patient to the MIDDLE of the patientsList
-    {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN}, null};
-      int size = 5;
-      int[] patientRecord = new int[] {32789, 6, 1};
-      int index = 4;
-      int expected = 6;
-      int actual = UrgentCareAdmissions.addPatient(patientRecord, index, patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
-    }
 
-    // (3) add a patient using an invalid (out-of-bounds) index
+    // (1) verify that a normal, valid-input constructor call does NOT throw an exception
     {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN}, null, null, null, null, null};
-      int size = 5;
-      int[] patientRecord = new int[] {32789, 6, 0};
-      int index = 20;
       try {
-        int actual = UrgentCareAdmissions.addPatient(patientRecord, index, patientsList, size);
-        // If no exception is thrown then return false
-        return false;
-      } catch (ArrayIndexOutOfBoundsException e) {
-        // Program works, move to next test case
-      }
-    }
-    return true;
-  }
-
-  /**
-   * This method tests the removeNextPatient method using the following two scenarios:
-   *
-   * 1. Removes a patient from the patient list containing more than 1 patient record. We expect the
-   * first patient to be removed from the list and then all the other records will shift one
-   * position left. To do this, we create a patient list with multiple records and remove the first
-   * one. The size of the patients list will decrease by 1.
-   *
-   * 2. Removes a patient from a patient list containing only one record. We expect the first
-   * patient to be removed from the list, and all values to become null. To do this, we create a
-   * patient list with just 1 record. The size of the patients list will become 0.
-   *
-   * @return true if and only if all test scenarios pass, false otherwise
-   * @author Rishabh Jain
-   */
-  public static boolean testRemovePatient() {
-    // (1) remove a patient from a patientsList containing more than one record
-    {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN}};
-      int size = 5;
-      int expected = 4;
-      int actual = UrgentCareAdmissions.removeNextPatient(patientsList, size);
-      if (expected != actual) {
+        PatientRecord actual = new PatientRecord('M', 45, 1);
+      } catch (Exception e) {
         return false;
       }
     }
 
-    // (2) remove a patient from a patientsList containing only one record
-    int[][] patientsList = new int[][] {{32702, 1, UrgentCareAdmissions.RED}};
-    int size = 1;
-    int expected = 0;
-    int actual = UrgentCareAdmissions.removeNextPatient(patientsList, size);
-    if (expected != actual) {
+
+    // (2) verify that a just-created object has size 0, is not full, has no seen patients, and
+    // its toString() is an empty string
+    ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(20);
+    if (patientsList.size() != 0 || patientsList.isFull() ||
+        patientsList.getNumberSeenPatients() != 0 || !patientsList.toString().equals("")) {
       return false;
     }
 
@@ -259,64 +163,403 @@ public class UrgentCareAdmissionsTester {
   }
 
   /**
-   * This method tests the getPatientIndex() method using the following 3 scenarios:
+   * This method verifies that calling the constructor with capacity <= 0 causes an
+   * IllegalArgumentException.
    *
-   * 1. Looks for a patient at the end of the list. To do this, we create a patients list with
-   * random records. Then we call the method on the case ID of the last record in the patients list.
-   * This should return the index of the last patient record in the list.
-   *
-   * 2. Looks for a patient in the middle of the list. To do this, we create a patients list with
-   * random records. Then we call the method on the case ID of a record in the middle of the list
-   * This should return the index of this patient record.
-   *
-   * 3. Looks for a patient not in the list. To do this, we create a patients list with random
-   * records. Then we call the method on a random case ID that does not belong in the list. The
-   * method should return -1.
-   *
-   * @return true if and only if all test scenarios pass, false otherwise
-   * @author Rishabh Jain
+   * @return true if and only if all scenario's pass and false otherwise.
    */
-  public static boolean testGetPatientIndex() {
-    // (1) look for a patient at the end of the list
+  public static boolean testAdmissionsConstructorError() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+
+
+    // (1) verify that calling the constructor with capacity <= 0 causes an IllegalArgumentException
+    try {
+      ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(-10);
+      //If no exception is thrown the test fails.
+      return false;
+    } catch (IllegalArgumentException e) {
+      //This is the right type of exception, but we need to ensure that a message is also shown.
+      if (e.getMessage() == null || e.getMessage().isBlank()) {
+        return false;
+      }
+    } catch (Exception e) {
+      //If any other exception is thrown then return false.
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * This method tests the add patient method, by adding a patient to an empty list, at the end of
+   * the list, and at the beginning of the list.
+   *
+   * @return true if and only if all scenario's pass, and false otherwise.
+   */
+  public static boolean testAddPatientValid() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+
+
+    // (1) add a new patient to an empty list - since you cannot use Arrays.deepEquals() here
+    // anymore, verify the contents of the patientsList using ExceptionalCareAdmissions.toString()
     {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN}};
-      int size = 5;
-      int expected = 4;
-      int caseID = 31501;
-      int actual = UrgentCareAdmissions.getPatientIndex(caseID, patientsList, size);
-      if (expected != actual) {
+      try {
+        ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(20);
+        PatientRecord rec = new PatientRecord('M', 45, 1);
+        patientsList.addPatient(rec, patientsList.getAdmissionIndex(rec));
+        String expected = "24501: 45M (YELLOW)";
+        String actual = patientsList.toString();
+        if (!expected.equals(actual)) {
+          return false;
+        }
+
+      } catch (Exception e) {
         return false;
       }
     }
 
-    // (2) look for a patient in the middle of the list
+
+    // (2) add a new patient to the end of the list
     {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN},};
-      int size = 5;
+      // FIRST: reset the patient counter so this tester method can be run independently
+      PatientRecord.resetCounter();
+
+      try {
+        ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(20);
+        patientsList.addPatient(new PatientRecord('M', 45, 0), 0);
+        PatientRecord rec = new PatientRecord('F', 32, 2);
+        patientsList.addPatient(rec, patientsList.getAdmissionIndex(rec));
+        String expected = "24501: 45M (RED)\n13202: 32F (GREEN)";
+        String actual = patientsList.toString();
+        if (!expected.equals(actual)) {
+          return false;
+        }
+
+      } catch (Exception e) {
+        return false;
+      }
+    }
+
+
+    // (3) add a new patient to the beginning of the list
+    {
+      // FIRST: reset the patient counter so this tester method can be run independently
+      PatientRecord.resetCounter();
+      try {
+        ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(20);
+        patientsList.addPatient(new PatientRecord('M', 45, 2), 0);
+        PatientRecord rec = new PatientRecord('F', 32, 0);
+        patientsList.addPatient(rec, patientsList.getAdmissionIndex(rec));
+        String expected = "13202: 32F (RED)\n24501: 45M (GREEN)";
+        String actual = patientsList.toString();
+        if (!expected.equals(actual)) {
+          return false;
+        }
+
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * This test method is provided for you in its entirety, to give you a model for verifying a
+   * method which throws exceptions. This method tests addPatient() with two different, full
+   * patientsList arrays; one contains seen patients and one does not.
+   *
+   * We assume for the purposes of this method that the ExceptionalCareAdmissions constructor and
+   * PatientRecord constructor are working properly.
+   *
+   * This method must NOT allow ANY exceptions to be thrown from the tested method.
+   *
+   * @return true if and only if all scenarios pass, false otherwise
+   * @author hobbes
+   */
+  public static boolean testAddPatientError() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+
+
+    //(1) a full Admissions object that contains no seen patients
+
+    // create a small admissions object and fill it with patients. i'm filling the list
+    // in decreasing order of triage, so the addPatient() method has to do the least
+    // amount of work.
+    ExceptionalCareAdmissions full = new ExceptionalCareAdmissions(3);
+    full.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+    full.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+
+    // saving one patient in a local variable, so we can mark them "seen" later
+    PatientRecord seenPatient = new PatientRecord('F', 20, PatientRecord.GREEN);
+    full.addPatient(seenPatient, 2);
+
+    try {
+      full.addPatient(new PatientRecord('F', 17, PatientRecord.GREEN), 3);
+      // if we get here, no exception was thrown and the test fails
+      return false;
+    } catch (IllegalStateException e) {
+      // this is the correct type of exception, but for this method we expect a specific
+      // error message so we have one more step to verify:
+      String message = e.getMessage();
+      String expected = "Cannot admit new patients";
+      if (!message.equals(expected)) {
+        return false;
+      }
+    } catch (Exception e) {
+      // this is the incorrect exception type, and we can just fail the test now
+      return false;
+    }
+
+
+    //(2) a full Admissions object that contains at least one seen patient
+
+    // since we have a reference to the patient at index 2, we'll just mark them seen here
+    seenPatient.seePatient();
+
+    try {
+      full.addPatient(new PatientRecord('F', 17, PatientRecord.GREEN), 3);
+      // if we get here, no exception was thrown and the test fails
+      return false;
+    } catch (IllegalStateException e) {
+      // this is the correct type of exception again, but we expect a different error
+      // message this time:
+      String message = e.getMessage();
+      String expected = "cleanPatientsList()";
+      if (!message.equals(expected)) {
+        return false;
+      }
+    } catch (Exception e) {
+      // this is the incorrect exception type, and the test fails here
+      return false;
+    }
+
+    // if we've gotten this far, we haven't failed either of the scenarios, so our test passes!
+    return true;
+  }
+
+  /**
+   * This method tests the getAdmissionIndex method by calling the method on records that should be
+   * added to the end of the list, start of the list, and middle of the list.
+   *
+   * @return true if and only if all scenario's pass, and false otherwise
+   */
+  public static boolean testGetIndexValid() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+
+    // create an Admissions object and add a few Records to it, leaving some space
+    ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(20);
+    patientsList.addPatient(new PatientRecord('M', 18, PatientRecord.YELLOW), 0);
+    patientsList.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+    patientsList.addPatient(new PatientRecord('F', 17, PatientRecord.GREEN), 2);
+
+
+    // (1) get the index of a PatientRecord that should go at the END
+    {
+      try {
+        int actual =
+            patientsList.getAdmissionIndex(new PatientRecord('X', 34, PatientRecord.GREEN));
+        int expected = 3;
+
+        if (actual != expected) {
+          return false;
+        }
+
+      } catch (Exception e) {
+        return false;
+      }
+    }
+
+
+    // (2) get the index of a PatientRecord that should go at the BEGINNING
+    {
+      try {
+        int actual = patientsList.getAdmissionIndex(new PatientRecord('X', 34, PatientRecord.RED));
+        int expected = 0;
+
+        if (actual != expected) {
+          return false;
+        }
+
+      } catch (Exception e) {
+        return false;
+      }
+    }
+
+
+    // (3) get the index of a PatientRecord that should go in the MIDDLE
+    {
+      try {
+        int actual =
+            patientsList.getAdmissionIndex(new PatientRecord('X', 34, PatientRecord.YELLOW));
+        int expected = 2;
+
+        if (actual != expected) {
+          return false;
+        }
+
+      } catch (Exception e) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * This method is used to test the getAdmissionIndex method, to check that it throws the correct
+   * exceptions.
+   *
+   * @return true if and only if all scenario's pass, and false otherwise.
+   */
+  public static boolean testGetIndexError() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+    // create an Admissions object and add Records to it until it is full, as in testAddPatientError
+    ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(3);
+    patientsList.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+    patientsList.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+    PatientRecord seenPatient = new PatientRecord('F', 17, PatientRecord.GREEN);
+    patientsList.addPatient(seenPatient, 2);
+
+
+    // (1) verify the exception when there are no patients who have been seen in the list
+    {
+      try {
+        patientsList.getAdmissionIndex(new PatientRecord('F', 17, PatientRecord.GREEN));
+        // if we get here, no exception was thrown and the test fails
+        return false;
+      } catch (IllegalStateException e) {
+        // this is the correct type of exception again, but we expect a different error
+        // message this time:
+        String message = e.getMessage();
+        String expected = "Cannot admit new patients";
+        if (!message.equals(expected)) {
+          return false;
+        }
+
+      } catch (Exception e) {
+        // this is the incorrect exception type, and the test fails here
+        return false;
+      }
+    }
+
+
+    // (2) verify the exception when there is at least one patient who has been seen
+    {
+      try {
+        seenPatient.seePatient();
+        patientsList.getAdmissionIndex(new PatientRecord('F', 17, PatientRecord.GREEN));
+        // if we get here, no exception was thrown and the test fails
+        return false;
+      } catch (IllegalStateException e) {
+        // this is the correct type of exception again, but we expect a different error
+        // message this time:
+        String message = e.getMessage();
+        String expected = "cleanPatientsList()";
+        if (!message.equals(expected)) {
+          return false;
+        }
+      } catch (Exception e) {
+        // this is the incorrect exception type, and the test fails here
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * The method tests that all the accessor methods are functioning correctly.
+   *
+   * @return true if and only if all scenario's pass, and false otherwise.
+   */
+  public static boolean testAdmissionsBasicAccessors() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+
+
+    // (1) verify isFull() on a non-full and a full Admissions object
+    //Full Admissions object
+    {
+      ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(2);
+      patientsList.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+      patientsList.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+
+      if (!patientsList.isFull()) {
+        return false;
+      }
+    }
+
+    //Non-full admissions object
+    {
+      ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(6);
+      patientsList.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+      patientsList.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+
+      if (patientsList.isFull()) {
+        return false;
+      }
+    }
+
+
+    // (2) verify size() before and after adding a PatientRecord
+    ExceptionalCareAdmissions patientsList = new ExceptionalCareAdmissions(6);
+    patientsList.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+    patientsList.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+    PatientRecord rec = new PatientRecord('F', 12, PatientRecord.GREEN);
+
+    //Before adding
+    {
       int expected = 2;
-      int caseID = 22002;
-      int actual = UrgentCareAdmissions.getPatientIndex(caseID, patientsList, size);
+      int actual = patientsList.size();
+
       if (expected != actual) {
         return false;
       }
     }
 
-    // (3) look for a patient not present in the list
+    //After adding
     {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN},};
-      int size = 5;
-      int expected = -1;
-      int caseID = 49495;
-      int actual = UrgentCareAdmissions.getPatientIndex(caseID, patientsList, size);
+      patientsList.addPatient(rec, 2);
+      int expected = 3;
+      int actual = patientsList.size();
+      if (expected != actual) {
+        return false;
+      }
+    }
+
+
+    // (3) verify getNumberSeenPatients() before and after seeing a patient
+    // (see testAddPatientError for a model of how to do this while bypassing seePatient())
+    //FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+    // Before seeing
+    {
+      ExceptionalCareAdmissions patientsList2 = new ExceptionalCareAdmissions(6);
+      patientsList2.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+      patientsList2.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+
+      int actual = patientsList2.getNumberSeenPatients();
+      int expected = 0;
+
+      if (expected != actual) {
+        return false;
+      }
+
+
+      //After seeing
+      // saving one patient in a local variable, so we can mark them "seen" later
+      PatientRecord seenPatient = new PatientRecord('F', 20, PatientRecord.GREEN);
+      patientsList2.addPatient(seenPatient, 2);
+      patientsList2.seePatient(12003);
+
+      int newActual = patientsList2.getNumberSeenPatients();
+      int newExpected = 1;
+
       if (expected != actual) {
         return false;
       }
@@ -326,243 +569,191 @@ public class UrgentCareAdmissionsTester {
   }
 
   /**
-   * This method tests the getLongestWaitingPatientIndex() method using the following 2 scenarios:
+   * This method is used to test the seePatient method, to check if correctly marks the patients as
+   * seen when appropriate.
    *
-   * 1. Calls the method on a patientsList with only one patient. To do this, we create a patient
-   * list with only one record, and call the method. This should return the index 0 of the record.
-   *
-   * 2. Calls the method on a patientsList with at least three patients. To do this, we create a
-   * patient list with multiple records and call the method. This then returns the index of the
-   * record that has the highest arrival order.
-   *
-   * @return true if and only if all test scenarios pass, false otherwise
-   * @author Rishabh Jain
+   * @return true if and only if all scenario's pass, and false otherwise.
    */
-  public static boolean testLongestWaitingPatient() {
-    // (1) call the method on a patientsList with only one patient
+
+  public static boolean testSeePatientValid() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+    // create an Admissions object and add a few Records to it, saving a shallow copy of
+    // at least one of the PatientRecord references
+    ExceptionalCareAdmissions full = new ExceptionalCareAdmissions(6);
+    full.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+    full.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+
+    // saving one patient in a local variable, so we can mark them "seen" later
+    PatientRecord seenPatient = new PatientRecord('F', 20, PatientRecord.GREEN);
+    full.addPatient(seenPatient, 2);
+
+
+    // (1) call seePatient() on the caseID of your saved reference and verify that its
+    // hasBeenSeen() accessor return value changes
     {
-      int[][] patientsList = new int[][] {{32702, 1, UrgentCareAdmissions.RED}};
-      int size = 1;
-      int expected = 0;
-      int actual = UrgentCareAdmissions.getLongestWaitingPatientIndex(patientsList, size);
-      if (expected != actual) {
+      try {
+        full.seePatient(12003);
+        if (!seenPatient.hasBeenSeen()) {
+          return false;
+        }
+      } catch (Exception e) {
         return false;
       }
     }
 
-    // (2) call the method on a patientsList with at least three patients
+
+    // (2) verify getNumberSeenPatients() before and after seeing a different patient
+    //Before seeing
+    PatientRecord newSeenPatient = new PatientRecord('X', 56, PatientRecord.GREEN);
+    full.addPatient(newSeenPatient, 3);
     {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN},};
-      int size = 5;
-      int expected = 4;
-      int actual = UrgentCareAdmissions.getLongestWaitingPatientIndex(patientsList, size);
-      if (expected != actual) {
+      if (newSeenPatient.hasBeenSeen()) {
+        return false;
+      }
+      //After seeing
+      try {
+        full.seePatient(35604);
+        if (!newSeenPatient.hasBeenSeen()) {
+          return false;
+        }
+      } catch (Exception e) {
         return false;
       }
     }
+
     return true;
   }
 
+
   /**
-   * This method is used to test the edge cases of all the other methods. It tests the following
-   * scenarios:
+   * This method is used to check whether the seePatient method throws the correct exceptions.
    *
-   * 1. tests the getAdmissionIndex() method using an empty patientsList array and any triage level.
-   * To do this, we create an empty patient list and call the method. The method should return the
-   * index 0.
-   *
-   * 2. tests getAdmissionIndex() using a full patientsList array and any triage level. To do this,
-   * we create a full patient list with random patient records. We call the method, and it should
-   * return -1 because there is no space to add a new record.
-   *
-   * 3. tests addPatient() using a full patientsList array. To do this, we create a full patient
-   * list with random patient records. Then we call the method using a random patient record, and it
-   * will simply return the size of the original array because there is no space to add the new
-   * record and the array will not be modified in any way.
-   *
-   * 4. tests removeNextPatient() using an empty patientsList array. To do this, we create an empty
-   * patient list and call the method. This method should return 0 because the size will be zero and
-   * no patient record will be removed.
-   *
-   * 5. tests getPatientIndex() using an empty patientsList array. To do this, we create an empty
-   * patient list and call the method. The method will return -1, because the patient list is
-   * empty.
-   *
-   * 6. tests getLongestWaitingPatientIndex() using an empty patientsList array. To do this, we
-   * create an empty patient list and call the method. The method will return -1, because the
-   * patient list is empty.
-   *
-   * @return true if and only if all test scenarios pass, false otherwise
-   * @author Rishabh Jain
+   * @return true if and only if all the scenario's pass, and false otherwise.
    */
-  public static boolean testEmptyAndFullArrays() {
-    // (1) test getAdmissionIndex using an empty patientsList array and any triage level
-    {
-      int[][] patientsList = new int[4][];
-      int size = 0;
-      int expected = 0;
-      int actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.RED, patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
-    }
+  public static boolean testSeePatientError() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+    // (1) verify that seeing a caseID for a patient not in the list causes an IllegalStateException
+    ExceptionalCareAdmissions full = new ExceptionalCareAdmissions(3);
+    full.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+    full.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
 
-    // (2) test getAdmissionIndex using a full patientsList array and any triage level
-    {
-      int[][] patientsList = new int[][] {{32702, 3, UrgentCareAdmissions.RED},
-          {21801, 2, UrgentCareAdmissions.YELLOW}, {22002, 4, UrgentCareAdmissions.YELLOW},
-          {11901, 5, UrgentCareAdmissions.YELLOW}, {31501, 1, UrgentCareAdmissions.GREEN},};
-      int size = 5;
-      int expected = -1;
-      int actual =
-          UrgentCareAdmissions.getAdmissionIndex(UrgentCareAdmissions.RED, patientsList, size);
-      if (expected != actual) {
+    try {
+      full.seePatient(99999);
+      // if we get here, no exception was thrown and the test fails
+      return false;
+    } catch (IllegalArgumentException e) {
+      // this is the correct type of exception, but for this method we expect a specific
+      // error message so we have one more step to verify:
+      if (e.getMessage() == null || e.getMessage().isBlank()) {
         return false;
       }
-    }
-
-    // (3) test addPatient using a full patientsList array
-    {
-      int[][] patientsList = new int[][] {{32702, 3, UrgentCareAdmissions.RED},
-          {21801, 2, UrgentCareAdmissions.YELLOW}, {22002, 4, UrgentCareAdmissions.YELLOW},
-          {11901, 5, UrgentCareAdmissions.YELLOW}, {31501, 1, UrgentCareAdmissions.GREEN},};
-      int size = 5;
-      int expected = 5;
-      int[] patientRecord = new int[] {32789, 6, 0};
-      int index = 1;
-      int actual = UrgentCareAdmissions.addPatient(patientRecord, index, patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
-    }
-
-    // (4) test removeNextPatient using an empty patientsList array
-    {
-      int[][] patientsList = new int[4][];
-      int size = 0;
-      int expected = 0;
-      int actual = UrgentCareAdmissions.removeNextPatient(patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
-    }
-
-    // (5) test getPatientIndex using an empty patientsList array
-    {
-      int[][] patientsList = new int[4][];
-      int size = 0;
-      int expected = -1;
-      int caseID = 45454;
-      int actual = UrgentCareAdmissions.getPatientIndex(caseID, patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
-    }
-
-    // (6) test getLongestWaitingPatientIndex using an empty patientsList array
-    {
-      int[][] patientsList = new int[4][];
-      int size = 0;
-      int expected = -1;
-      int actual = UrgentCareAdmissions.getLongestWaitingPatientIndex(patientsList, size);
-      if (expected != actual) {
-        return false;
-      }
+    } catch (Exception e) {
+      // this is the incorrect exception type, and we can just fail the test now
+      return false;
     }
 
     return true;
   }
 
   /**
-   * This method is used to test the getSummary() method. It tests the following scenarios:
+   * This method is used to test the getSummary Method. It checks whether the method returns the
+   * correct string in the file.
    *
-   * 1. tests getSummary using an empty patientsList. To do this, we create an empty patient list
-   * and call the method. This would be the string where the values for the total number of
-   * patients, RED patients, YELLOW patients, and GREEN patients would all be 0.
-   *
-   * 2. tests getSummary using a patientsList with multiple patients at a single triage level. To do
-   * this, we define a patients list such that all the patients have the same "RED" triagle level.
-   * This would return a string where the values for the total number of patients and RED patients
-   * will be 5 and for YELLOW and GREEN patients the values are 0.
-   *
-   * 3. tests getSummary using a patientsList with patients at all triage levels. To do this, we
-   * define a patients list such that the list contains patients with "RED", "YELLOW" and "GREEN"
-   * triagle levels. This would return the string with values accordingly.
-   *
-   * @return
+   * @return true if and only if all scenario's pass, and false otherwise.
    */
   public static boolean testGetSummary() {
-    // (1) test getSummary using an empty patientsList
-    {
-      int[][] patientsList = new int[4][];
-      int size = 0;
-      String expected = "Total number of patients: 0\nRED: 0\nYELLOW: 0\nGREEN: 0";
-      String actual = UrgentCareAdmissions.getSummary(patientsList, size);
-      if (!expected.equals(actual)) {
-        return false;
-      }
-    }
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+    // (1) choose one getSummary() test from P01; this method has not changed much
+    ExceptionalCareAdmissions full = new ExceptionalCareAdmissions(3);
+    full.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+    full.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
 
-    // (2) test getSummary using a patientsList with multiple patients at a single triage level
-    {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.RED}, {11901, 5, UrgentCareAdmissions.RED},
-              {31501, 1, UrgentCareAdmissions.RED}};
-      int size = 5;
-      String expected = "Total number of patients: 5\nRED: 5\nYELLOW: 0\nGREEN: 0";
-      String actual = UrgentCareAdmissions.getSummary(patientsList, size);
-      if (!expected.equals(actual)) {
-        return false;
-      }
-    }
+    String actual = full.getSummary();
+    String expected = String.format(
+        "Total number of patients: 2\n" + "Total number seen: 0\n" + "RED: 1\n" + "YELLOW: 1\n" +
+            "GREEN: 0");
 
-    // (3) test getSummary using a patientsList with patients at all triage levels
-    {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.YELLOW}, {11901, 5, UrgentCareAdmissions.YELLOW},
-              {31501, 1, UrgentCareAdmissions.GREEN},};
-      int size = 5;
-      String expected = "Total number of patients: 5\nRED: 2\nYELLOW: 2\nGREEN: 1";
-      String actual = UrgentCareAdmissions.getSummary(patientsList, size);
-      if (!expected.equals(actual)) {
-        return false;
-      }
+    if (!expected.equals(actual)) {
+      return false;
     }
-    {
-      int[][] patientsList =
-          new int[][] {{32702, 3, UrgentCareAdmissions.RED}, {21801, 2, UrgentCareAdmissions.RED},
-              {22002, 4, UrgentCareAdmissions.GREEN}, {11901, 5, UrgentCareAdmissions.GREEN},
-              null,};
-      int size = 4;
-      String expected = "Total number of patients: 4\nRED: 2\nYELLOW: 0\nGREEN: 2";
-      String actual = UrgentCareAdmissions.getSummary(patientsList, size);
-      if (!expected.equals(actual)) {
-        return false;
-      }
-    }
-
     return true;
   }
 
   /**
-   * Runs each of the tester methods and displays their result
+   * This method is used to test the cleanPatient method. It checks whether the data for seen
+   * patients is accurately being written in our file.
    *
-   * @param args
+   * @return true if and only if all scenario's pass, and false otherwise.
    */
-  public static void main(String[] args) {
-    System.out.println("get index: " + testGetIndex());
-    System.out.println("add patient: " + testAddPatient());
-    System.out.println("remove patient: " + testRemovePatient());
-    System.out.println("get patient: " + testGetPatientIndex());
-    System.out.println("longest wait: " + testLongestWaitingPatient());
-    System.out.println("empty/full: " + testEmptyAndFullArrays());
-    System.out.println("get summary: " + testGetSummary());
+  public static boolean testCleanList() {
+    // FIRST: reset the patient counter so this tester method can be run independently
+    PatientRecord.resetCounter();
+
+    // (1) using ExceptionalCareAdmissions.toString(), verify that a patientsList with NO seen
+    // patients does not change after calling cleanPatientsList()
+    {
+      ExceptionalCareAdmissions full = new ExceptionalCareAdmissions(5);
+      full.addPatient(new PatientRecord('M', 18, PatientRecord.RED), 0);
+      full.addPatient(new PatientRecord('M', 5, PatientRecord.YELLOW), 1);
+      full.addPatient(new PatientRecord('M', 45, PatientRecord.GREEN), 2);
+
+      String expected = "21801: 18M (RED)\n20502: 5M (YELLOW)\n24503: 45M (GREEN)";
+      File file = new File("hello.txt");
+      full.cleanPatientsList(file);
+      String actual = full.toString();
+
+      if (!expected.equals(actual)) {
+        return false;
+      }
+
+      // (2) call seePatient() for at least two of the records in your patientsList, and use
+      // toString() to verify that they have been removed after calling cleanPatientsList()
+
+      PatientRecord seenPatient1 = (new PatientRecord('M', 5, PatientRecord.GREEN));
+      full.addPatient(seenPatient1, 3);
+      PatientRecord seenPatient2 = (new PatientRecord('M', 45, PatientRecord.GREEN));
+      full.addPatient(seenPatient2, 4);
+
+      full.seePatient(20504);
+      full.seePatient(24505);
+
+      full.cleanPatientsList(file);
+      String newActual = full.toString();
+
+      if (!expected.equals(newActual)) {
+        return false;
+      }
+    }
+
+    // NOTE: you do NOT need to verify file contents in this test method; please do so manually
+    return true;
   }
 
+  /**
+   * Runs each of the tester methods and displays the result. Methods with two testers have their
+   * output grouped for convenience; a failed test is displayed as "X" and a passed test is
+   * displayed as "pass"
+   *
+   * @param args unused
+   * @author hobbes
+   */
+
+  public static void main(String[] args) {
+    System.out.println("PatientRecord: " + (testPatientRecord() ? "pass" : "X"));
+    System.out.println(
+        "Admissions Constructor: " + (testAdmissionsConstructorValid() ? "pass" : "X") + ", " +
+            (testAdmissionsConstructorError() ? "pass" : "X"));
+    System.out.println("Add Patient: " + (testAddPatientValid() ? "pass" : "X") + ", " +
+        (testAddPatientError() ? "pass" : "X"));
+    System.out.println("Get Admission Index: " + (testGetIndexValid() ? "pass" : "X") + ", " +
+        (testGetIndexError() ? "pass" : "X"));
+    System.out.println("Basic Accessors: " + (testAdmissionsBasicAccessors() ? "pass" : "X"));
+    System.out.println("See Patient: " + (testSeePatientValid() ? "pass" : "X") + ", " +
+        (testSeePatientError() ? "pass" : "X"));
+    System.out.println("Get Summary: " + (testGetSummary() ? "pass" : "X"));
+    System.out.println("Clean List: " + (testCleanList() ? "pass" : "X"));
+  }
 }
